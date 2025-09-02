@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Health Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <div class="menu">
+      <button id="menuBtn">☰</button>
+      <div class="dropdown" id="profileMenu">
+        <h3>👤 Profile</h3>
+        <p id="profileName"></p>
+        <p id="profileAge"></p>
+        <p id="profileGender"></p>
+        <p id="profileCondition"></p>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </div>
+    <h1>Health Dashboard</h1>
+  </header>
+
+  <main>
+    <!-- Graphs -->
+    <section class="card graph-card">
+      <h2>📊 Health Trends</h2>
+      <canvas id="healthChart"></canvas>
+    </section>
+
+    <!-- History -->
+    <section class="card history-card">
+      <h2>📜 History</h2>
+      <button id="downloadCsvBtn">⬇ Download CSV</button>
+      <div id="historyLog" class="history-log"></div>
+    </section>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
