@@ -1,41 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard - Health Tracker</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Health Dashboard</title>
+  <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <header>
-    <div class="menu">
-      <button id="menuBtn">☰</button>
-      <div class="dropdown" id="profileMenu">
-        <h3>👤 Profile</h3>
-        <p id="profileName"></p>
-        <p id="profileAge"></p>
-        <p id="profileGender"></p>
-        <p id="profileCondition"></p>
-        <button onclick="logout()">Logout</button>
-      </div>
+  <header class="dash-header">
+    <h1 id="welcome">Your Health Dashboard</h1>
+    <div class="header-actions">
+      <button class="mode-toggle" id="modeBtn" title="Toggle dark/light">🌙</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
-    <h1>Health Dashboard</h1>
   </header>
 
-  <main>
-    <!-- Graphs -->
-    <section class="card graph-card">
-      <h2>📊 Health Trends</h2>
-      <canvas id="healthChart"></canvas>
+  <nav class="tabs">
+    <button class="tab active" data-tab="glucose" onclick="setActiveTab('glucose')">🩸 Glucose</button>
+    <button class="tab" data-tab="bp" onclick="setActiveTab('bp')">🩺 Blood Pressure</button>
+    <button class="tab" data-tab="temp" onclick="setActiveTab('temp')">🌡️ Temperature</button>
+    <button class="tab" data-tab="heart" onclick="setActiveTab('heart')">❤️ Heart Rate</button>
+  </nav>
+
+  <main class="dash-main">
+    <section class="glass-card metric-card">
+      <h2 id="metricTitle">Glucose</h2>
+      <div class="metric-value" id="metricValue">--</div>
+      <div class="metric-status" id="metricStatus">Waiting…</div>
     </section>
 
-    <!-- History -->
-    <section class="card history-card">
-      <h2>📜 History</h2>
-      <button id="downloadCsvBtn">⬇ Download CSV</button>
-      <div id="historyLog" class="history-log"></div>
+    <section class="glass-card chart-card">
+      <h3 id="chartTitle">Glucose Trend</h3>
+      <canvas id="metricChart"></canvas>
+    </section>
+
+    <section class="mini-grid">
+      <div class="mini glass-card"><div class="mini-title">Glucose</div><div class="mini-value" id="mini-glucose">--</div></div>
+      <div class="mini glass-card"><div class="mini-title">BP</div><div class="mini-value" id="mini-bp">--/--</div></div>
+      <div class="mini glass-card"><div class="mini-title">Temp</div><div class="mini-value" id="mini-temp">--</div></div>
+      <div class="mini glass-card"><div class="mini-title">Heart</div><div class="mini-value" id="mini-heart">--</div></div>
+    </section>
+
+    <!-- AI Suggestions -->
+    <section class="glass-card suggestions-card">
+      <h3>AI Health Assistant</h3>
+      <ul id="suggestionList"></ul>
     </section>
   </main>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
+
+  <!-- Alert sound -->
+  <audio id="alertSound" src="alert.mp3" preload="auto"></audio>
 
   <script src="dashboard.js"></script>
 </body>
