@@ -106,6 +106,7 @@ window.onload = ()=>{
   renderHistory();
   renderGraph();
 
-  // auto-generate new readings every 10s
-  setInterval(addRandomReading, 10000);
+  // auto-generate new readings every 1s
+  setInterval(addRandomReading, 1000);
 };
+
