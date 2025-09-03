@@ -1,177 +1,77 @@
-let currentTab = "glucose";
-let chart;
-let history = [];
-let stepCount = 0;
-let lastStepTime = 0;
-const MAX_HISTORY = 100;
+const SESSION_KEY = 'ht_session';
+const USER_DATA_KEY = 'ht_user_data';
 
-// Profile Load
-window.addEventListener("DOMContentLoaded", () => {
-  const profile = JSON.parse(localStorage.getItem("profile"));
-  if (!profile) window.location.href = "index.html";
-  document.getElementById("pName").innerText = profile.name;
-  document.getElementById("pAge").innerText = profile.age;
-  document.getElementById("pGender").innerText = profile.gender;
-  document.getElementById("pHeight").innerText = profile.height;
-  document.getElementById("pWeight").innerText = profile.weight;
-});
+function $(id){ return document.getElementById(id); }
+function getSession(){ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+function loadUserData(email){ const blob = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}'); return blob[email] || { profile: {}, readings: {}, suggestions: [] }; }
+function saveUserData(email,data){ const blob = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}'); blob[email]=data; localStorage.setItem(USER_DATA_KEY, JSON.stringify(blob)); }
 
-// Tab Switching
-function setActiveTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll(".tab").forEach(btn => btn.classList.remove("active"));
-  document.querySelector(`.tab[data-tab="${tab}"]`).classList.add("active");
+const session = getSession();
+if(!session || !session.email) location.href = "index.html";
+const email = session.email;
+let userData = loadUserData(email);
 
-  document.querySelector(".metric-card").classList.add("hidden");
-  document.querySelector(".chart-card").classList.add("hidden");
-  document.getElementById("stepsSection").classList.add("hidden");
-  document.getElementById("historySection").classList.add("hidden");
+function renderProfile(){
+  const info = userData.profile || {};
+  $('profileInfo').innerHTML = `
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Name:</strong> ${info.name || '---'}</p>
+    <p><strong>Age:</strong> ${info.age || '---'}</p>
+    <p><strong>Gender:</strong> ${info.gender || '---'}</p>
+  `;
+}
+renderProfile();
 
-  if (tab === "steps") {
-    document.getElementById("stepsSection").classList.remove("hidden");
-  } else if (tab === "history") {
-    document.getElementById("historySection").classList.remove("hidden");
-    renderHistory();
-  } else {
-    document.querySelector(".metric-card").classList.remove("hidden");
-    document.querySelector(".chart-card").classList.remove("hidden");
-    updateChart(tab);
-  }
+function createChart(ctx,label,color){
+  return new Chart(ctx,{type:'line',data:{labels:[],datasets:[{label,data:[],borderColor:color,fill:false}]},options:{responsive:true,scales:{x:{display:true},y:{display:true}}}});
 }
 
-// Simulate readings for Glucose, BP, Temp, Heart
-function simulateReading() {
-  let value;
-  if (currentTab === "glucose") {
-    value = Math.floor(Math.random() * 80) + 80; // 80–160 mg/dL
-  } else if (currentTab === "bp") {
-    value = `${Math.floor(Math.random() * 60 + 100)}/${Math.floor(Math.random() * 40 + 60)}`; // mmHg
-  } else if (currentTab === "temp") {
-    value = (36 + Math.random() * 2).toFixed(1); // °C
-  } else if (currentTab === "heart") {
-    value = Math.floor(Math.random() * 40 + 60); // bpm
-  }
+const charts={
+  glucose:createChart($("glucoseChart"),"Glucose","red"),
+  bp:createChart($("bpChart"),"BP Systolic","blue"),
+  temp:createChart($("tempChart"),"Temp","orange"),
+  heart:createChart($("heartChart"),"Heart Rate","green"),
+  steps:createChart($("stepsChart"),"Steps","purple")
+};
 
-  document.getElementById("metricValue").innerText = value;
-  document.getElementById("latestReading").innerText = `Latest: ${value}`;
-  document.getElementById("metricTitle").innerText = currentTab.toUpperCase();
-  document.getElementById("chartTitle").innerText = `${currentTab.toUpperCase()} Trend`;
-
-  addToHistory(currentTab, value);
-  aiSuggestions(currentTab, value);
+function addHistory(type,value){
+  const now=new Date().toLocaleTimeString();
+  if(!userData.readings[type]) userData.readings[type]=[];
+  userData.readings[type].push({time:now,value});
+  if(userData.readings[type].length>100) userData.readings[type].shift();
+  saveUserData(email,userData);
+  $(type+"History").innerHTML=userData.readings[type].map(r=>`<li>${r.time}: ${r.value}</li>`).join("");
 }
 
-// Chart Setup
-function updateChart(tab) {
-  const ctx = document.getElementById("metricChart").getContext("2d");
-  if (chart) chart.destroy();
-
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: history.map(h => h.time),
-      datasets: [{
-        label: tab,
-        data: history.filter(h => h.type === tab).map(h => h.value),
-        borderColor: tab === "glucose" ? "red" :
-                     tab === "bp" ? "blue" :
-                     tab === "temp" ? "orange" : "green",
-        fill: false
-      }]
-    }
-  });
+function updateSuggestions(){
+  const suggestions=[];
+  const g=userData.readings.glucose?.slice(-1)[0];
+  if(g){ if(g.value>180) suggestions.push("⚠️ High glucose. Walk 20–30 mins."); else if(g.value<70) suggestions.push("⚠️ Low glucose. Eat a snack."); else suggestions.push("✅ Glucose normal."); }
+  const h=userData.readings.heart?.slice(-1)[0];
+  if(h && h.value>100) suggestions.push("⚠️ High heart rate. Relax.");
+  $("suggestionList").innerHTML=suggestions.map(s=>`<li>${s}</li>`).join("");
+  userData.suggestions=suggestions; saveUserData(email,userData);
 }
 
-// History
-function addToHistory(type, value) {
-  const now = new Date().toLocaleTimeString();
-  history.push({ type, value, time: now });
-  if (history.length > MAX_HISTORY) history.shift();
+function updateReading(type,value){
+  if(type==="bp") $("bpValue").textContent=value; else $(type+"Value").textContent=value;
+  addHistory(type,value);
+  const chart=charts[type];
+  chart.data.labels.push(new Date().toLocaleTimeString());
+  chart.data.datasets[0].data.push(value.includes?parseInt(value.split("/")[0]):value);
+  if(chart.data.labels.length>20){chart.data.labels.shift();chart.data.datasets[0].data.shift();}
+  chart.update();
+  updateSuggestions();
+  if(type==="glucose"&&(value>180||value<70)) $("alertSound").play();
 }
 
-function renderHistory() {
-  const list = document.getElementById("historyList");
-  list.innerHTML = "";
-  history.slice(-MAX_HISTORY).forEach(h => {
-    const li = document.createElement("li");
-    li.textContent = `[${h.time}] ${h.type}: ${h.value}`;
-    list.appendChild(li);
-  });
-}
+// Simulated readings
+setInterval(()=>{
+  updateReading("glucose",Math.floor(Math.random()*100)+70);
+  updateReading("bp",`${100+Math.floor(Math.random()*30)}/${70+Math.floor(Math.random()*20)}`);
+  updateReading("temp",(36+Math.random()*1.5).toFixed(1));
+  updateReading("heart",60+Math.floor(Math.random()*40));
+  updateReading("steps",Math.floor(Math.random()*5000));
+},5000);
 
-// AI Suggestions
-function aiSuggestions(type, value) {
-  const suggestions = document.getElementById("suggestionList");
-  suggestions.innerHTML = "";
-  let msg = "";
-
-  if (type === "glucose") {
-    if (value > 180) msg = "⚠️ High glucose. Walk 10,000+ steps today.";
-    else if (value > 140) msg = "Slightly high glucose. Aim for ~8,500 steps.";
-    else if (value < 70) msg = "⚠️ Low glucose. Eat first, avoid walking until stable.";
-    else msg = "Normal glucose. Maintain with ~5,000–7,000 steps.";
-  }
-
-  if (type === "bp" && typeof value === "string") {
-    const [sys, dia] = value.split("/").map(Number);
-    if (sys > 140 || dia > 90) msg = "⚠️ High BP. Reduce salt, manage stress.";
-  }
-
-  if (type === "temp" && value > 37.5) {
-    msg = "Mild fever. Stay hydrated and rest.";
-  }
-
-  if (type === "heart" && value > 100) {
-    msg = "High heart rate. Avoid stress, rest well.";
-  }
-
-  if (msg) {
-    const li = document.createElement("li");
-    li.textContent = msg;
-    suggestions.appendChild(li);
-  }
-}
-
-// Step Counter
-function startStepCounter() {
-  if (window.DeviceMotionEvent) {
-    window.addEventListener("devicemotion", function(event) {
-      let acc = event.accelerationIncludingGravity;
-      let totalAcc = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
-      let now = Date.now();
-
-      if (totalAcc > 12 && (now - lastStepTime > 250)) {
-        stepCount++;
-        lastStepTime = now;
-        updateStepUI();
-      }
-    });
-  } else {
-    // Simulation for desktop
-    setInterval(() => {
-      stepCount += Math.floor(Math.random() * 5);
-      updateStepUI();
-    }, 3000);
-  }
-}
-
-function updateStepUI() {
-  document.getElementById("steps").innerText = stepCount + " steps";
-  document.getElementById("distance").innerText = (stepCount*0.0008).toFixed(2) + " km";
-  document.getElementById("calories").innerText = (stepCount*0.04).toFixed(1) + " kcal";
-}
-
-// Dark/Light mode toggle
-document.getElementById("modeBtn").addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-});
-
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("profile");
-  window.location.href = "index.html";
-});
-
-// Start
-setInterval(simulateReading, 5000);
-startStepCounter();
+$("logoutBtn").onclick=()=>{localStorage.removeItem(SESSION_KEY);location.href="index.html";};
