@@ -1,108 +1,63 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #f4f7fa;
+  background: linear-gradient(135deg,#dbe6f6,#c5796d);
   color: #333;
 }
 
-.dark {
-  background: #1e1e1e;
-  color: #f4f7fa;
-}
-
-header.dash-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  background: #0077cc;
-  color: white;
-}
-
-.tabs {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  background: #e0e0e0;
-}
-
-.tab {
-  padding: 8px 12px;
-  border: none;
-  cursor: pointer;
-}
-
-.tab.active {
-  background: #0077cc;
-  color: white;
-  border-radius: 6px;
-}
-
+/* Glassmorphism */
 .glass-card {
-  background: rgba(255,255,255,0.9);
-  padding: 15px;
-  margin: 10px;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.15);
+  border-radius: 15px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-.metric-card {
-  text-align: center;
-  font-size: 1.2em;
-}
-
-.metric-value {
-  font-size: 2em;
-  margin: 10px 0;
-}
-
-.chart-card {
-  height: 300px;
-}
-
-.history-card ul {
-  max-height: 200px;
-  overflow-y: auto;
-  list-style: none;
-  padding: 0;
-}
-
+/* Login */
 .login-body {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg,#74ebd5,#ACB6E5);
 }
-
-.login-card {
-  width: 300px;
+.login-card { width: 320px; }
+.login-card h1 { text-align: center; margin-bottom: 20px; }
+.login-card form { display: flex; flex-direction: column; gap: 10px; }
+.login-card input, .login-card select {
+  padding: 8px; border: none; border-radius: 8px;
 }
-
-button {
-  padding: 8px 12px;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
 .btn-primary {
-  background: #0077cc;
-  color: white;
+  background: #0077ff; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;
 }
-
 .btn-danger {
-  background: #cc0000;
-  color: white;
+  background: #e63946; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;
 }
 
-.hidden {
-  display: none;
+/* Dashboard Layout */
+.dashboard-body { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 250px;
+  padding: 20px;
 }
-
-.profile-menu {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 200px;
+.dash-main {
+  flex: 1;
+  padding: 20px;
 }
+.metric-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(320px,1fr));
+  gap: 20px;
+}
+.metric-card h3 { margin-top: 0; }
+.metric-value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.history-list {
+  max-height: 120px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+}
+.suggestions-card ul { list-style: none; padding: 0; }
