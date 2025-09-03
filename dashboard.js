@@ -1,161 +1,119 @@
-// Dashboard Script
-const SESSION_KEY = 'ht_session';
-const $ = (id) => document.getElementById(id);
+const SESSION_KEY = "ht_session";
+const PROFILE_KEY = "ht_profile";
+const HISTORY_KEY = "ht_history";
 
-let currentMetric = 'glucose';
-let chart;
-let history = {
-  glucose: [], bp: [], temp: [], heart: []
+const $ = id => document.getElementById(id);
+
+// Session
+let session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+if (!session) location.href = "index.html";
+
+// Logout
+$("logoutBtn").onclick = () => {
+  localStorage.removeItem(SESSION_KEY);
+  location.href = "index.html";
 };
 
-// ---- Session check ----
-function getSession(){
-  try { return JSON.parse(localStorage.getItem(SESSION_KEY)); }
-  catch { return null; }
+// Profile Load
+let profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+function renderProfile() {
+  $("pName").textContent = profile.name || "--";
+  $("pAge").textContent = profile.age || "--";
+  $("pGender").textContent = profile.gender || "--";
+  $("pPref").textContent = profile.pref || "--";
 }
-function logout(){
-  localStorage.removeItem(SESSION_KEY);
-  location.href = 'index.html';
-}
+renderProfile();
 
-// ---- Tab Handling ----
-function setActiveTab(metric){
-  currentMetric = metric;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelector(`.tab[data-tab="${metric}"]`).classList.add('active');
+// Profile Modal
+$("editProfileBtn").onclick = () => {
+  $("profileModal").style.display = "block";
+  $("inputName").value = profile.name || "";
+  $("inputAge").value = profile.age || "";
+  $("inputGender").value = profile.gender || "";
+  $("inputPref").value = profile.pref || "";
+};
+$("saveProfileBtn").onclick = () => {
+  profile = {
+    name: $("inputName").value,
+    age: $("inputAge").value,
+    gender: $("inputGender").value,
+    pref: $("inputPref").value
+  };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  $("profileModal").style.display = "none";
+  renderProfile();
+};
+function closeProfileModal() { $("profileModal").style.display = "none"; }
 
-  $('metricTitle').textContent = metricLabel(metric);
-  $('chartTitle').textContent = `${metricLabel(metric)} Trend`;
-  updateUI();
-}
-function metricLabel(m){
-  switch(m){
-    case 'glucose': return 'Glucose';
-    case 'bp': return 'Blood Pressure';
-    case 'temp': return 'Temperature';
-    case 'heart': return 'Heart Rate';
-  }
-}
+// Graph Data
+let glucoseData = [], bpSysData = [], bpDiaData = [], tempData = [], heartData = [], labels = [];
+let glucoseHistory = [], bpHistory = [], tempHistory = [], hrHistory = [];
 
-// ---- Chart ----
-function initChart(){
-  const ctx = $('metricChart').getContext('2d');
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: '',
-        data: [],
-        fill: false,
-        borderColor: '#0078d4',
-        tension: 0.2
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: { y: { beginAtZero: false } }
-    }
-  });
-}
-function updateChart(metric){
-  const dataArr = history[metric];
-  chart.data.labels = dataArr.map((_,i)=>i+1);
-  chart.data.datasets[0].label = metricLabel(metric);
-  chart.data.datasets[0].data = dataArr;
-  chart.update();
+// Charts
+const glucoseChart = new Chart($("glucoseChart").getContext("2d"), { type: "line", data:{ labels, datasets:[{label:"Glucose",borderColor:"red",data:glucoseData}] }});
+const bpChart = new Chart($("bpChart").getContext("2d"), { type:"line", data:{ labels, datasets:[
+  {label:"Systolic",borderColor:"blue",data:bpSysData},
+  {label:"Diastolic",borderColor:"green",data:bpDiaData}
+]}});
+const tempChart = new Chart($("tempChart").getContext("2d"), { type:"line", data:{ labels, datasets:[{label:"Temperature",borderColor:"orange",data:tempData}] }});
+const heartChart = new Chart($("heartChart").getContext("2d"), { type:"line", data:{ labels, datasets:[{label:"Heart Rate",borderColor:"purple",data:heartData}] }});
+
+// Tabs
+function setTab(tab) {
+  document.querySelectorAll(".graph-section, #historySection").forEach(sec => sec.style.display="none");
+  if(tab==="glucose") $("glucoseSection").style.display="block";
+  if(tab==="bp") $("bpSection").style.display="block";
+  if(tab==="temp") $("tempSection").style.display="block";
+  if(tab==="heart") $("heartSection").style.display="block";
+  if(tab==="history") { $("historySection").style.display="block"; renderHistory(); }
 }
 
-// ---- Random Data Simulation ----
-function generateReading(){
-  const glucose = (70 + Math.random()*80).toFixed(1);
-  const sys = Math.floor(100 + Math.random()*40);
-  const dia = Math.floor(60 + Math.random()*20);
-  const bp = `${sys}/${dia}`;
-  const temp = (36 + Math.random()*2).toFixed(1);
-  const heart = Math.floor(60 + Math.random()*40);
+// Tick (simulate readings)
+function tick() {
+  let now = new Date().toLocaleTimeString();
+  labels.push(now); if(labels.length>20) labels.shift();
 
-  history.glucose.push(Number(glucose));
-  history.bp.push(bp);
-  history.temp.push(Number(temp));
-  history.heart.push(heart);
+  let g = Math.floor(80+Math.random()*40);
+  let s = Math.floor(110+Math.random()*30);
+  let d = Math.floor(70+Math.random()*15);
+  let t = +(36+Math.random()*2).toFixed(1);
+  let h = Math.floor(60+Math.random()*40);
 
-  if(history.glucose.length>10) history.glucose.shift();
-  if(history.bp.length>10) history.bp.shift();
-  if(history.temp.length>10) history.temp.shift();
-  if(history.heart.length>10) history.heart.shift();
+  glucoseData.push(g); if(glucoseData.length>20) glucoseData.shift();
+  bpSysData.push(s); if(bpSysData.length>20) bpSysData.shift();
+  bpDiaData.push(d); if(bpDiaData.length>20) bpDiaData.shift();
+  tempData.push(t); if(tempData.length>20) tempData.shift();
+  heartData.push(h); if(heartData.length>20) heartData.shift();
 
-  updateUI();
+  glucoseHistory.push({value:g,time:now});
+  bpHistory.push({value:s+"/"+d,time:now});
+  tempHistory.push({value:t,time:now});
+  hrHistory.push({value:h,time:now});
+
+  glucoseChart.update(); bpChart.update(); tempChart.update(); heartChart.update();
+}
+setInterval(tick,2000);
+
+// History
+function renderHistory() {
+  let log = $("historyLog");
+  log.innerHTML = "";
+  glucoseHistory.slice(-20).forEach(r => log.innerHTML += `<p>🩸 Glucose: ${r.value} at ${r.time}</p>`);
+  bpHistory.slice(-20).forEach(r => log.innerHTML += `<p>🩺 BP: ${r.value} at ${r.time}</p>`);
+  tempHistory.slice(-20).forEach(r => log.innerHTML += `<p>🌡️ Temp: ${r.value} at ${r.time}</p>`);
+  hrHistory.slice(-20).forEach(r => log.innerHTML += `<p>❤️ Heart: ${r.value} at ${r.time}</p>`);
 }
 
-// ---- UI Update ----
-function updateUI(){
-  let val;
-  switch(currentMetric){
-    case 'glucose': val = history.glucose.at(-1) || '--'; break;
-    case 'bp': val = history.bp.at(-1) || '--'; break;
-    case 'temp': val = history.temp.at(-1) || '--'; break;
-    case 'heart': val = history.heart.at(-1) || '--'; break;
-  }
-  $('metricValue').textContent = val;
+// Export CSV
+$("exportCSV").onclick = () => {
+  let csv = "Type,Value,Time\n";
+  glucoseHistory.forEach(r=> csv+=`Glucose,${r.value},${r.time}\n`);
+  bpHistory.forEach(r=> csv+=`Blood Pressure,${r.value},${r.time}\n`);
+  tempHistory.forEach(r=> csv+=`Temperature,${r.value},${r.time}\n`);
+  hrHistory.forEach(r=> csv+=`Heart Rate,${r.value},${r.time}\n`);
 
-  // mini cards
-  $('mini-glucose').textContent = history.glucose.at(-1) || '--';
-  $('mini-bp').textContent = history.bp.at(-1) || '--';
-  $('mini-temp').textContent = history.temp.at(-1) || '--';
-  $('mini-heart').textContent = history.heart.at(-1) || '--';
-
-  // AI Suggestions
-  updateSuggestions();
-
-  // chart
-  if(currentMetric !== 'bp') updateChart(currentMetric);
-}
-
-// ---- Suggestions ----
-function updateSuggestions(){
-  const list = $('suggestionList');
-  list.innerHTML = '';
-  const g = history.glucose.at(-1);
-  const bp = history.bp.at(-1);
-  const t = history.temp.at(-1);
-  const h = history.heart.at(-1);
-
-  if(g && g > 140) addSuggestion("High glucose detected, consider reducing sugar intake.");
-  if(bp){
-    const [sys,dia] = bp.split('/').map(Number);
-    if(sys>130 || dia>85) addSuggestion("Blood pressure is elevated. Monitor stress & salt intake.");
-  }
-  if(t && t > 37.5) addSuggestion("Fever detected. Stay hydrated and rest.");
-  if(h && h > 100) addSuggestion("High heart rate. Try deep breathing.");
-  if(list.innerHTML==='') addSuggestion("All readings look normal ✅");
-}
-function addSuggestion(text){
-  const li = document.createElement('li');
-  li.textContent = text;
-  $('suggestionList').appendChild(li);
-}
-
-// ---- Toast ----
-function showToast(msg){
-  const div = document.createElement('div');
-  div.className = 'toast';
-  div.textContent = msg;
-  $('toastContainer').appendChild(div);
-  setTimeout(()=>div.remove(), 3000);
-}
-
-// ---- Init ----
-(function init(){
-  const session = getSession();
-  if(!session || !session.email){ location.href = 'index.html'; return; }
-  $('welcome').textContent = `Welcome, ${session.email}`;
-
-  $('logoutBtn').onclick = logout;
-  $('modeBtn').onclick = ()=> document.body.classList.toggle('dark');
-
-  initChart();
-  setActiveTab('glucose');
-  generateReading();
-  setInterval(generateReading, 5000);
-})();
+  let blob = new Blob([csv],{type:"text/csv"});
+  let url = URL.createObjectURL(blob);
+  let a=document.createElement("a"); a.href=url; a.download="health_history.csv"; a.click();
+  URL.revokeObjectURL(url);
+};
