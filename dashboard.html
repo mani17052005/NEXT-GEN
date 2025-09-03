@@ -8,58 +8,60 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script defer src="dashboard.js"></script>
 </head>
-<body>
-  <header class="dash-header">
-    <div class="profile-menu glass-card">
-      <h3>👤 Profile</h3>
-      <p><b>Name:</b> <span id="pName"></span></p>
-      <p><b>Age:</b> <span id="pAge"></span></p>
-      <p><b>Gender:</b> <span id="pGender"></span></p>
-      <p><b>Height:</b> <span id="pHeight"></span> cm</p>
-      <p><b>Weight:</b> <span id="pWeight"></span> kg</p>
-      <button id="logoutBtn" class="btn-danger">Logout</button>
-    </div>
-    <h1>📊 Health Dashboard</h1>
-    <button class="mode-toggle" id="modeBtn" title="Toggle dark/light">🌙</button>
-  </header>
+<body class="dashboard-body">
+  <!-- Sidebar/Profile Menu -->
+  <aside class="sidebar glass-card">
+    <h2>👤 Profile</h2>
+    <div id="profileInfo"></div>
+    <button id="logoutBtn" class="btn-danger">Logout</button>
+  </aside>
 
-  <nav class="tabs">
-    <button class="tab active" data-tab="glucose" onclick="setActiveTab('glucose')">🩸 Glucose</button>
-    <button class="tab" data-tab="bp" onclick="setActiveTab('bp')">🩺 Blood Pressure</button>
-    <button class="tab" data-tab="temp" onclick="setActiveTab('temp')">🌡️ Temperature</button>
-    <button class="tab" data-tab="heart" onclick="setActiveTab('heart')">❤️ Heart Rate</button>
-    <button class="tab" data-tab="steps" onclick="setActiveTab('steps')">🏃 Steps</button>
-    <button class="tab" data-tab="history" onclick="setActiveTab('history')">📜 History</button>
-  </nav>
-
+  <!-- Main Dashboard -->
   <main class="dash-main">
-    <!-- Metric Section -->
-    <section class="glass-card metric-card">
-      <h2 id="metricTitle">Glucose</h2>
-      <div class="metric-value" id="metricValue">--</div>
-      <div class="metric-status" id="metricStatus">Waiting…</div>
-      <div class="latest-reading" id="latestReading">Latest: --</div>
-    </section>
+    <header class="dash-header">
+      <h1>📊 Health Dashboard</h1>
+    </header>
 
-    <!-- Chart Section -->
-    <section class="glass-card chart-card">
-      <h3 id="chartTitle">Glucose Trend</h3>
-      <canvas id="metricChart"></canvas>
-    </section>
+    <section class="metric-section">
+      <!-- Glucose -->
+      <div class="metric-card glass-card">
+        <h3>🩸 Glucose (mg/dL)</h3>
+        <div class="metric-value" id="glucoseValue">--</div>
+        <canvas id="glucoseChart"></canvas>
+        <ul id="glucoseHistory" class="history-list"></ul>
+      </div>
 
-    <!-- Steps Section -->
-    <section class="glass-card metric-card hidden" id="stepsSection">
-      <h2>Step Counter</h2>
-      <div class="metric-value" id="steps">0 steps</div>
-      <div id="distance">0 km</div>
-      <div id="calories">0 kcal</div>
-      <div id="stepGoal">Goal: 10000 steps</div>
-    </section>
+      <!-- Blood Pressure -->
+      <div class="metric-card glass-card">
+        <h3>🩺 Blood Pressure (mmHg)</h3>
+        <div class="metric-value" id="bpValue">--/--</div>
+        <canvas id="bpChart"></canvas>
+        <ul id="bpHistory" class="history-list"></ul>
+      </div>
 
-    <!-- History Section -->
-    <section class="glass-card history-card hidden" id="historySection">
-      <h3>History</h3>
-      <ul id="historyList"></ul>
+      <!-- Temperature -->
+      <div class="metric-card glass-card">
+        <h3>🌡️ Temperature (°C)</h3>
+        <div class="metric-value" id="tempValue">--</div>
+        <canvas id="tempChart"></canvas>
+        <ul id="tempHistory" class="history-list"></ul>
+      </div>
+
+      <!-- Heart Rate -->
+      <div class="metric-card glass-card">
+        <h3>❤️ Heart Rate (bpm)</h3>
+        <div class="metric-value" id="heartValue">--</div>
+        <canvas id="heartChart"></canvas>
+        <ul id="heartHistory" class="history-list"></ul>
+      </div>
+
+      <!-- Step Count -->
+      <div class="metric-card glass-card">
+        <h3>👟 Steps</h3>
+        <div class="metric-value" id="stepsValue">--</div>
+        <canvas id="stepsChart"></canvas>
+        <ul id="stepsHistory" class="history-list"></ul>
+      </div>
     </section>
 
     <!-- AI Suggestions -->
@@ -69,9 +71,7 @@
     </section>
   </main>
 
-  <!-- Toast container -->
-  <div id="toastContainer"></div>
-  <!-- Alert sound -->
+  <!-- Alert Sound -->
   <audio id="alertSound" src="alert.mp3" preload="auto"></audio>
 </body>
 </html>
