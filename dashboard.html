@@ -3,57 +3,77 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Health Dashboard</title>
+  <title>Dashboard</title>
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <header class="dash-header">
-    <h1 id="welcome">Your Health Dashboard</h1>
-    <div class="header-actions">
-      <button class="mode-toggle" id="modeBtn" title="Toggle dark/light">🌙</button>
-      <button class="logout-btn" id="logoutBtn">Logout</button>
-    </div>
-  </header>
+  <!-- Profile top-left -->
+  <aside class="profile-box" id="profileBox">
+    <h3>User Profile</h3>
+    <p><strong>Name:</strong> <span id="pName">--</span></p>
+    <p><strong>Age:</strong> <span id="pAge">--</span></p>
+    <p><strong>Gender:</strong> <span id="pGender">--</span></p>
+    <p><strong>Preference:</strong> <span id="pPref">--</span></p>
+    <button id="editProfileBtn">Edit Profile</button>
+    <button id="logoutBtn">Logout</button>
+  </aside>
 
+  <!-- Tabs -->
   <nav class="tabs">
-    <button class="tab active" data-tab="glucose" onclick="setActiveTab('glucose')">🩸 Glucose</button>
-    <button class="tab" data-tab="bp" onclick="setActiveTab('bp')">🩺 Blood Pressure</button>
-    <button class="tab" data-tab="temp" onclick="setActiveTab('temp')">🌡️ Temperature</button>
-    <button class="tab" data-tab="heart" onclick="setActiveTab('heart')">❤️ Heart Rate</button>
+    <button class="tab active" onclick="setTab('glucose')">🩸 Glucose</button>
+    <button class="tab" onclick="setTab('bp')">🩺 Blood Pressure</button>
+    <button class="tab" onclick="setTab('temp')">🌡️ Temperature</button>
+    <button class="tab" onclick="setTab('heart')">❤️ Heart Rate</button>
+    <button class="tab" onclick="setTab('history')">📜 History</button>
   </nav>
 
+  <!-- Graph Sections -->
   <main class="dash-main">
-    <section class="glass-card metric-card">
-      <h2 id="metricTitle">Glucose</h2>
-      <div class="metric-value" id="metricValue">--</div>
-      <div class="metric-status" id="metricStatus">Waiting…</div>
+    <section id="glucoseSection" class="graph-section">
+      <h2>Glucose Trend</h2>
+      <canvas id="glucoseChart"></canvas>
     </section>
 
-    <section class="glass-card chart-card">
-      <h3 id="chartTitle">Glucose Trend</h3>
-      <canvas id="metricChart"></canvas>
+    <section id="bpSection" class="graph-section" style="display:none;">
+      <h2>Blood Pressure Trend</h2>
+      <canvas id="bpChart"></canvas>
     </section>
 
-    <section class="mini-grid">
-      <div class="mini glass-card"><div class="mini-title">Glucose</div><div class="mini-value" id="mini-glucose">--</div></div>
-      <div class="mini glass-card"><div class="mini-title">BP</div><div class="mini-value" id="mini-bp">--/--</div></div>
-      <div class="mini glass-card"><div class="mini-title">Temp</div><div class="mini-value" id="mini-temp">--</div></div>
-      <div class="mini glass-card"><div class="mini-title">Heart</div><div class="mini-value" id="mini-heart">--</div></div>
+    <section id="tempSection" class="graph-section" style="display:none;">
+      <h2>Temperature Trend</h2>
+      <canvas id="tempChart"></canvas>
     </section>
 
-    <!-- AI Suggestions -->
-    <section class="glass-card suggestions-card">
-      <h3>AI Health Assistant</h3>
-      <ul id="suggestionList"></ul>
+    <section id="heartSection" class="graph-section" style="display:none;">
+      <h2>Heart Rate Trend</h2>
+      <canvas id="heartChart"></canvas>
+    </section>
+
+    <section id="historySection" style="display:none;">
+      <h2>History of Readings</h2>
+      <div id="historyLog"></div>
+      <button id="exportCSV">⬇️ Export CSV</button>
     </section>
   </main>
 
-  <!-- Toast container -->
-  <div id="toastContainer"></div>
-
-  <!-- Alert sound -->
-  <audio id="alertSound" src="alert.mp3" preload="auto"></audio>
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <h2>Edit Profile</h2>
+      <input type="text" id="inputName" placeholder="Name"/>
+      <input type="number" id="inputAge" placeholder="Age"/>
+      <select id="inputGender">
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+      <input type="text" id="inputPref" placeholder="Preference (e.g. Diabetic, Normal)"/>
+      <button id="saveProfileBtn">Save</button>
+      <button onclick="closeProfileModal()">Cancel</button>
+    </div>
+  </div>
 
   <script src="dashboard.js"></script>
 </body>
