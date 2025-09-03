@@ -1,7 +1,6 @@
 // --------- Utilities ---------
 const USERS_KEY = 'ht_users';
 const SESSION_KEY = 'ht_session';
-const USER_DATA_KEY = 'ht_user_data';
 
 const $ = (id) => document.getElementById(id);
 
@@ -10,35 +9,51 @@ function toggleForm(mode){
   $('loginForm').style.display  = mode === 'login' ? 'block' : 'none';
 }
 
+// SHA-256 password hashing
 async function sha256(text){
   const enc = new TextEncoder().encode(text);
   const buf = await crypto.subtle.digest('SHA-256', enc);
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-function loadUsers(){ return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
-function saveUsers(users){ localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
-function setSession(email, remember=true){ localStorage.setItem(SESSION_KEY, JSON.stringify({email, ts: Date.now(), remember})); }
-function getSession(){ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+function loadUsers(){
+  try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveUsers(users){
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+function setSession(email, remember=true){
+  localStorage.setItem(SESSION_KEY, JSON.stringify({email, ts: Date.now(), remember}));
+}
+function getSession(){
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+  catch { return null; }
+}
 
-// --------- Signup ---------
+// --------- Sign Up ---------
 async function signup(){
   const email = $('signupEmail').value.trim().toLowerCase();
   const password = $('signupPassword').value;
+
   if(!email || !password) return alert('Please fill all fields.');
-
   const users = loadUsers();
-  if(users.some(u => u.email === email)) return alert('Account already exists. Please login.');
-
+  if(users.some(u => u.email === email)){
+    alert('Account already exists. Please login.');
+    toggleForm('login');
+    $('loginEmail').value = email;
+    return;
+  }
   const passHash = await sha256(password);
   users.push({email, passHash, createdAt: new Date().toISOString()});
   saveUsers(users);
 
-  const blob = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
-  blob[email] = blob[email] || { profile: { email }, readings: {}, suggestions: [] };
-  localStorage.setItem(USER_DATA_KEY, JSON.stringify(blob));
+  // create default profile blob for this user
+  const blob = JSON.parse(localStorage.getItem('ht_user_data') || '{}');
+  blob[email] = blob[email] || { profile: {}, readings: [], suggestions: [] };
+  localStorage.setItem('ht_user_data', JSON.stringify(blob));
 
-  alert('✅ Account created! You can login now.');
+  alert('Account created! You can login now.');
   toggleForm('login');
   $('loginEmail').value = email;
 }
