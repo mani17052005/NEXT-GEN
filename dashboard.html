@@ -6,72 +6,191 @@
   <title>Health Dashboard</title>
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script defer src="dashboard.js"></script>
 </head>
-<body class="dashboard-body">
-  <!-- Sidebar/Profile Menu -->
-  <aside class="sidebar glass-card">
-    <h2>👤 Profile</h2>
-    <div id="profileInfo"></div>
-    <button id="logoutBtn" class="btn-danger">Logout</button>
+<body>
+  <!-- Slide-out Profile Menu -->
+  <aside id="profilePanel" class="profile-panel">
+    <div class="profile-header">
+      <h3>Profile</h3>
+      <button id="closeProfile" class="icon-btn" title="Close">✕</button>
+    </div>
+
+    <form id="profileForm" class="profile-form">
+      <label>Full Name
+        <input id="pf_name" placeholder="John Doe" />
+      </label>
+      <label>Age (years)
+        <input id="pf_age" type="number" min="0" />
+      </label>
+      <label>Gender
+        <select id="pf_gender">
+          <option value="">Select…</option>
+          <option>Female</option>
+          <option>Male</option>
+          <option>Non-binary</option>
+          <option>Prefer not to say</option>
+        </select>
+      </label>
+      <label>Height (cm)
+        <input id="pf_height" type="number" min="0" step="0.1"/>
+      </label>
+      <label>Weight (kg)
+        <input id="pf_weight" type="number" min="0" step="0.1"/>
+      </label>
+      <label>Activity Level
+        <select id="pf_activity">
+          <option value="">Select…</option>
+          <option>Sedentary</option>
+          <option>Lightly Active</option>
+          <option>Moderately Active</option>
+          <option>Very Active</option>
+        </select>
+      </label>
+      <label>Goal
+        <input id="pf_goal" placeholder="e.g., keep glucose 90–120 mg/dL"/>
+      </label>
+
+      <!-- Extra: Your Suggestions textarea inside profile -->
+      <label>Your Suggestions (notes)
+        <textarea id="pf_notes" rows="3" placeholder="Add your own tips or instructions…"></textarea>
+      </label>
+
+      <!-- FAQ inside profile -->
+      <details class="faq-block">
+        <summary>F&Q (Help)</summary>
+        <div class="faq-content">
+          <p><strong>Which units are used?</strong></p>
+          <ul>
+            <li>Glucose — mg/dL</li>
+            <li>Blood Pressure — mmHg</li>
+            <li>Temperature — °C</li>
+            <li>Heart Rate — BPM</li>
+          </ul>
+          <p><strong>How does AI suggestion work?</strong><br/>
+            It checks the most recent readings and near-term trends, then gives tips to maintain normal ranges.</p>
+          <p><strong>Where is my data stored?</strong><br/>
+            Locally in your browser (per user) using localStorage.</p>
+        </div>
+      </details>
+
+      <div class="profile-actions">
+        <button type="button" id="saveProfile" class="btn-primary">Save</button>
+        <button type="button" id="logoutBtn" class="btn-danger">Logout</button>
+      </div>
+    </form>
   </aside>
 
-  <!-- Main Dashboard -->
-  <main class="dash-main">
-    <header class="dash-header">
-      <h1>📊 Health Dashboard</h1>
-    </header>
+  <!-- Top bar -->
+  <header class="topbar">
+    <button id="openProfile" class="profile-trigger">☰ Profile</button>
+    <div class="spacer"></div>
+    <button id="themeBtn" class="icon-btn" title="Toggle Theme">🌓</button>
+  </header>
 
-    <section class="metric-section">
+  <!-- Content -->
+  <main class="container">
+
+    <!-- Alerts / AI Suggestions -->
+    <section class="glass alerts-suggestions">
+      <div>
+        <h3>AI Health Assistant</h3>
+        <ul id="suggestionList"></ul>
+      </div>
+      <div id="toastContainer"></div>
+      <audio id="alertSound" src="alert.mp3" preload="auto"></audio>
+    </section>
+
+    <!-- DASHBOARD GRID: each metric has a chart and a sidebar list of recent readings -->
+    <section class="grid-2">
       <!-- Glucose -->
-      <div class="metric-card glass-card">
-        <h3>🩸 Glucose (mg/dL)</h3>
-        <div class="metric-value" id="glucoseValue">--</div>
-        <canvas id="glucoseChart"></canvas>
-        <ul id="glucoseHistory" class="history-list"></ul>
+      <div class="glass card">
+        <div class="card-head">
+          <h3>Glucose</h3>
+          <div class="pill" id="status-glucose">--</div>
+        </div>
+        <canvas id="chart-glucose"></canvas>
+        <div class="reading-row">
+          <div class="reading-col">
+            <h4>Recent Readings</h4>
+            <ul id="readings-glucose" class="readings"></ul>
+          </div>
+          <div class="reading-col">
+            <p class="unit-note">Unit: mg/dL</p>
+            <p class="normal-note">Normal (fasting): ~70–99</p>
+            <p class="normal-note">Post-meal goal: &lt;140</p>
+          </div>
+        </div>
       </div>
 
       <!-- Blood Pressure -->
-      <div class="metric-card glass-card">
-        <h3>🩺 Blood Pressure (mmHg)</h3>
-        <div class="metric-value" id="bpValue">--/--</div>
-        <canvas id="bpChart"></canvas>
-        <ul id="bpHistory" class="history-list"></ul>
+      <div class="glass card">
+        <div class="card-head">
+          <h3>Blood Pressure</h3>
+          <div class="pill" id="status-bp">--</div>
+        </div>
+        <canvas id="chart-bp"></canvas>
+        <div class="reading-row">
+          <div class="reading-col">
+            <h4>Recent Readings</h4>
+            <ul id="readings-bp" class="readings"></ul>
+          </div>
+          <div class="reading-col">
+            <p class="unit-note">Unit: mmHg</p>
+            <p class="normal-note">Normal: &lt;120 / &lt;80</p>
+          </div>
+        </div>
       </div>
 
       <!-- Temperature -->
-      <div class="metric-card glass-card">
-        <h3>🌡️ Temperature (°C)</h3>
-        <div class="metric-value" id="tempValue">--</div>
-        <canvas id="tempChart"></canvas>
-        <ul id="tempHistory" class="history-list"></ul>
+      <div class="glass card">
+        <div class="card-head">
+          <h3>Temperature</h3>
+          <div class="pill" id="status-temp">--</div>
+        </div>
+        <canvas id="chart-temp"></canvas>
+        <div class="reading-row">
+          <div class="reading-col">
+            <h4>Recent Readings</h4>
+            <ul id="readings-temp" class="readings"></ul>
+          </div>
+          <div class="reading-col">
+            <p class="unit-note">Unit: °C</p>
+            <p class="normal-note">Normal: ~36.1–37.2</p>
+          </div>
+        </div>
       </div>
 
       <!-- Heart Rate -->
-      <div class="metric-card glass-card">
-        <h3>❤️ Heart Rate (bpm)</h3>
-        <div class="metric-value" id="heartValue">--</div>
-        <canvas id="heartChart"></canvas>
-        <ul id="heartHistory" class="history-list"></ul>
-      </div>
-
-      <!-- Step Count -->
-      <div class="metric-card glass-card">
-        <h3>👟 Steps</h3>
-        <div class="metric-value" id="stepsValue">--</div>
-        <canvas id="stepsChart"></canvas>
-        <ul id="stepsHistory" class="history-list"></ul>
+      <div class="glass card">
+        <div class="card-head">
+          <h3>Heart Rate</h3>
+          <div class="pill" id="status-heart">--</div>
+        </div>
+        <canvas id="chart-heart"></canvas>
+        <div class="reading-row">
+          <div class="reading-col">
+            <h4>Recent Readings</h4>
+            <ul id="readings-heart" class="readings"></ul>
+          </div>
+          <div class="reading-col">
+            <p class="unit-note">Unit: BPM</p>
+            <p class="normal-note">Resting: ~60–100</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- AI Suggestions -->
-    <section class="glass-card suggestions-card">
-      <h3>🤖 AI Health Assistant</h3>
-      <ul id="suggestionList"></ul>
+    <!-- History -->
+    <section class="glass history">
+      <div class="history-head">
+        <h3>History</h3>
+        <button id="downloadCsvBtn" class="btn-secondary">Download CSV</button>
+      </div>
+      <div id="historyLog" class="history-log"></div>
     </section>
+
   </main>
 
-  <!-- Alert Sound -->
-  <audio id="alertSound" src="alert.mp3" preload="auto"></audio>
+  <script src="dashboard.js"></script>
 </body>
 </html>
