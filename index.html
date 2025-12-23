@@ -1,65 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Health Tracker — Auth</title>
-  <link rel="stylesheet" href="styles.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Next-Gen Gluco Tracker – Login</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body class="auth-body">
-  <div class="auth-wrapper glass auth-card">
-    <h1 class="brand">Health Tracker</h1>
 
-    <!-- LOGIN -->
-    <form id="loginForm" class="form-stack">
-      <h2>Login</h2>
-      <label>Email
-        <input type="email" id="loginEmail" autocomplete="username" required />
-      </label>
-      <label>Password
-        <input type="password" id="loginPassword" autocomplete="current-password" required />
-      </label>
-      <label class="remember">
-        <input type="checkbox" id="rememberMe" checked/> Remember me
-      </label>
-      <div style="display:flex; gap:10px; justify-content:center;">
-        <button type="button" id="loginBtn" class="btn-primary">Login</button>
-        <button type="button" id="showSignup" class="btn-secondary">Sign Up</button>
-      </div>
-      <p class="muted"><a href="#" id="showForgot">Forgot password?</a></p>
-    </form>
+<div class="glass auth-card">
+  <h1 class="brand">Next-Gen Gluco Tracker</h1>
 
-    <!-- SIGNUP -->
-    <form id="signupForm" class="form-stack hidden">
-      <h2>Create Account</h2>
-      <label>Email
-        <input type="email" id="signupEmail" autocomplete="email" required />
-      </label>
-      <label>Password
-        <input type="password" id="signupPassword" autocomplete="new-password" required />
-      </label>
-      <div style="display:flex; gap:10px; justify-content:center;">
-        <button type="button" id="signupBtn" class="btn-primary">Sign Up</button>
-        <button type="button" id="showLogin" class="btn-secondary">Back</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- FORGOT PASSWORD MODAL -->
-  <div id="forgotModal" class="glass auth-card hidden" style="position:fixed; inset:0; margin:auto; width:min(420px,92%); z-index:50;">
-    <h2>Reset Password</h2>
-    <label>Email
-      <input type="email" id="forgotEmail" placeholder="you@email.com" />
+  <form id="loginForm" class="form-stack">
+    <h2>Login</h2>
+    <label>Email <input id="loginEmail" type="email"></label>
+    <label>Password <input id="loginPassword" type="password"></label>
+    <label class="remember">
+      <input type="checkbox" id="rememberMe" checked> Remember me
     </label>
-    <label>New Password
-      <input type="password" id="forgotNewPassword" placeholder="New password" />
-    </label>
-    <div style="display:flex; gap:10px; margin-top:10px; justify-content:center;">
-      <button type="button" id="resetBtn" class="btn-primary">Reset Password</button>
-      <button type="button" id="cancelReset" class="btn-secondary">Cancel</button>
-    </div>
-  </div>
+    <button type="button" id="loginBtn" class="btn-primary">Login</button>
+    <p class="muted"><a href="#" id="showSignup">Create account</a></p>
+  </form>
 
-  <script src="auth.js"></script>
+  <form id="signupForm" class="form-stack hidden">
+    <h2>Sign Up</h2>
+    <label>Email <input id="signupEmail" type="email"></label>
+    <label>Password <input id="signupPassword" type="password"></label>
+    <button type="button" id="signupBtn" class="btn-primary">Register</button>
+    <p class="muted"><a href="#" id="showLogin">Back to login</a></p>
+  </form>
+</div>
+
+<script src="auth.js"></script>
 </body>
 </html>
