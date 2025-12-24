@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Next-Gen Gluco Tracker – Login</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>Smart Shoe Health Monitor</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="auth-body">
 
-<div class="glass auth-card">
-  <h1 class="brand">Next-Gen Gluco Tracker</h1>
+<div class="auth-container">
+  <h1>❤️ Smart Shoe Health Monitor</h1>
+  <p>Create your patient profile to get started</p>
 
-  <form id="loginForm" class="form-stack">
-    <h2>Login</h2>
-    <label>Email <input id="loginEmail" type="email"></label>
-    <label>Password <input id="loginPassword" type="password"></label>
-    <label class="remember">
-      <input type="checkbox" id="rememberMe" checked> Remember me
-    </label>
-    <button type="button" id="loginBtn" class="btn-primary">Login</button>
-    <p class="muted"><a href="#" id="showSignup">Create account</a></p>
-  </form>
+  <div class="card">
+    <input id="name" placeholder="Full Name">
+    <div class="row">
+      <input id="age" placeholder="Age">
+      <select id="gender">
+        <option value="">Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+    </div>
 
-  <form id="signupForm" class="form-stack hidden">
-    <h2>Sign Up</h2>
-    <label>Email <input id="signupEmail" type="email"></label>
-    <label>Password <input id="signupPassword" type="password"></label>
-    <button type="button" id="signupBtn" class="btn-primary">Register</button>
-    <p class="muted"><a href="#" id="showLogin">Back to login</a></p>
-  </form>
+    <div class="row">
+      <input placeholder="Height (cm)">
+      <input placeholder="Weight (kg)">
+    </div>
+
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="signup()">Create Account</button>
+    <p class="link" onclick="location.href='dashboard.html'">
+      Already have an account? Sign In
+    </p>
+  </div>
 </div>
 
 <script src="auth.js"></script>
