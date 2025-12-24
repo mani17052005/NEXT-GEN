@@ -1,59 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Health Dashboard</title>
-<link rel="stylesheet" href="styles.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <title>Smart Shoe Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<header class="topbar">
-  <h2>AI Health Dashboard</h2>
-  <button id="themeBtn" class="btn-secondary">🌓</button>
+<header>
+  <h2>Smart Shoe Health Monitor</h2>
+  <span class="connected">● Connected</span>
 </header>
 
-<main class="container">
-
-<section class="card center">
-  <h2>Overall Health Score</h2>
-  <div id="healthScore">--</div>
-  <p id="healthRemark" class="muted"></p>
+<section class="status">
+  <div>🔵 Connection</div>
+  <div>🔋 Battery: 85%</div>
+  <div>📶 Signal: 92%</div>
 </section>
 
-<section class="alerts-suggestions card">
-  <h3>AI Health Assistant</h3>
-  <ul id="suggestions"></ul>
-</section>
-
-<section class="grid-2">
-  <div class="card">
-    <h3>Glucose</h3>
-    <canvas id="gChart"></canvas>
+<section class="cards">
+  <div class="card green">
+    <p>Glucose</p>
+    <h2 id="glucose">89 <span>mg/dL</span></h2>
   </div>
-  <div class="card">
-    <h3>Blood Pressure</h3>
-    <canvas id="bpChart"></canvas>
+  <div class="card green">
+    <p>Heart Rate</p>
+    <h2 id="heart">84 <span>BPM</span></h2>
   </div>
-  <div class="card">
-    <h3>Temperature</h3>
-    <canvas id="tChart"></canvas>
+  <div class="card green">
+    <p>Blood Pressure</p>
+    <h2 id="bp">112/79 <span>mmHg</span></h2>
   </div>
-  <div class="card">
-    <h3>Heart Rate</h3>
-    <canvas id="hChart"></canvas>
+  <div class="card green">
+    <p>Temperature</p>
+    <h2 id="temp">98.6 <span>°F</span></h2>
   </div>
 </section>
 
-<section class="card">
-  <h3>Trend Analysis</h3>
-  <ul id="trendList"></ul>
+<section class="grid">
+  <div class="chart-card">
+    <h3>Real-Time Health Monitoring</h3>
+    <canvas id="healthChart"></canvas>
+  </div>
+
+  <div class="insights">
+    <h3>AI Health Insights</h3>
+    <div class="insight good">✅ Glucose Levels Stable <span>95%</span></div>
+    <div class="insight warn">⚠️ Heart Rate Optimization <span>87%</span></div>
+    <div class="insight info">📊 Glucose Trend Analysis <span>78%</span></div>
+  </div>
 </section>
-
-<button id="downloadCsvBtn" class="btn-primary">Download CSV</button>
-
-</main>
 
 <script src="dashboard.js"></script>
 </body>
